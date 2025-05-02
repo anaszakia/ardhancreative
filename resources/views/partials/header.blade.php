@@ -84,9 +84,9 @@
                 </div>
             </div>
             <a href="{{ route('portfolio') }}" class="block py-2 text-white hover:text-blue-400 font-bold">Portfolio</a>
-            <a href="#" class="block py-2 text-white hover:text-blue-400 font-bold">Tentang Kami</a>
-            <a href="#" class="block py-2 text-white hover:text-blue-400 font-bold">Karir</a>
-            <a href="#" class="block py-2 text-white hover:text-blue-400 font-bold">Blog</a>
+            <a href="{{ route('tentang-kami') }}" class="block py-2 text-white hover:text-blue-400 font-bold">Tentang Kami</a>
+            <a href="{{ route('karir') }}" class="block py-2 text-white hover:text-blue-400 font-bold">Karir</a>
+            <a href="{{ route('blog') }}" class="block py-2 text-white hover:text-blue-400 font-bold">Blog</a>
             <a href="#" class="block py-2 text-white hover:bg-blue-400 font-bold bg-blue-500 px-4 rounded">Konsultasi Sekarang</a>
         </div>
     </div>
