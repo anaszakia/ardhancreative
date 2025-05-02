@@ -384,7 +384,7 @@
                         
                         <h1 class="text-5xl md:text-7xl font-bold leading-tight hero-title">
                             <span class="hero-title-word">TRANSFORMASI</span>
-                            <span class="hero-title-word">DIGITAL</span>
+                            <span class="hero-title-word">DIGITALISASI</span>
                             <span class="hero-title-word text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400">DIMULAI</span>
                             <span class="hero-title-word text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400">DARI</span>
                             <span class="hero-title-word text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400">SINI</span>
