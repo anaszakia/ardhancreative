@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+
 // Beranda
 Route::get('/', function () {
     return view('home');
@@ -58,3 +59,4 @@ Route::get('/blog', function () {
 Route::get('/konsultasi', function () {
     return view('konsultasi');
 })->name('konsultasi');
+

@@ -201,13 +201,22 @@
 <!-- Portfolio Section -->
 <section class="py-16 bg-gray-50 projects-section">
     <div class="container mx-auto px-4">
+
+        @php
+            use App\Models\Portfolio;
+            $portfolios = Portfolio::all();
+            $categories = Portfolio::select('category')->distinct()->pluck('category');
+        @endphp
+
         <!-- Filter -->
         <div class="flex justify-center mb-12 fade-in">
             <div class="inline-flex p-1 bg-white rounded-full shadow-md">
-                @foreach(['Semua', 'Web', 'Mobile', 'SEO', 'Design'] as $filter)
-                <button class="category-btn px-6 py-3 rounded-full font-medium {{ $loop->first ? 'active' : '' }}" 
-                        data-filter="{{ strtolower($filter) }}">
-                    {{ $filter }}
+                <button class="category-btn px-6 py-3 rounded-full font-medium active" data-filter="semua">
+                    Semua
+                </button>
+                @foreach($categories as $filter)
+                <button class="category-btn px-6 py-3 rounded-full font-medium" data-filter="{{ strtolower($filter) }}">
+                    {{ ucfirst($filter) }}
                 </button>
                 @endforeach
             </div>
@@ -215,30 +224,19 @@
 
         <!-- Projects Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 fade-in">
-            @foreach([
-                ['title' => 'Aplikasi E-Commerce', 'category' => 'mobile', 'image' => 'images/portfolio/mobile1.jpg'],
-                ['title' => 'Website Perusahaan', 'category' => 'web', 'image' => 'images/portfolio/web1.jpg'],
-                ['title' => 'Branding Produk', 'category' => 'design', 'image' => 'images/portfolio/design1.jpg'],
-                ['title' => 'Optimasi SEO', 'category' => 'seo', 'image' => 'images/portfolio/seo1.jpg'],
-                ['title' => 'Aplikasi Fintech', 'category' => 'mobile', 'image' => 'images/portfolio/mobile2.jpg'],
-                ['title' => 'Portal Berita', 'category' => 'web', 'image' => 'images/portfolio/web2.jpg']
-            ] as $project)
-            <div class="project-card bg-white shadow-md relative" data-category="{{ $project['category'] }}">
-                <img src="{{ asset($project['image']) }}" alt="{{ $project['title'] }}" class="w-full h-60 object-cover">
+            @foreach($portfolios as $project)
+            <div class="project-card bg-white shadow-md relative" data-category="{{ strtolower($project->category) }}">
+                <img src="{{ asset('storage/' . $project->image) }}" alt="{{ $project->title }}" class="w-full h-60 object-cover">
                 <div class="p-6">
-                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold 
-                        {{ $project['category'] == 'mobile' ? 'bg-blue-100 text-blue-800' : '' }}
-                        {{ $project['category'] == 'web' ? 'bg-green-100 text-green-800' : '' }}
-                        {{ $project['category'] == 'design' ? 'bg-purple-100 text-purple-800' : '' }}
-                        {{ $project['category'] == 'seo' ? 'bg-yellow-100 text-yellow-800' : '' }}">
-                        {{ ucfirst($project['category']) }}
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                        {{ ucfirst($project->category) }}
                     </span>
-                    <h3 class="text-xl font-bold mt-2">{{ $project['title'] }}</h3>
+                    <h3 class="text-xl font-bold mt-2">{{ $project->title }}</h3>
                 </div>
                 <div class="card-overlay">
-                    <h3 class="text-white text-2xl font-bold mb-4">{{ $project['title'] }}</h3>
+                    <h3 class="text-white text-2xl font-bold mb-4">{{ $project->title }}</h3>
                     <button class="detail-btn px-6 py-3 bg-white text-indigo-600 rounded-full font-medium" 
-                            data-project="{{ json_encode($project) }}">
+                            data-project='@json(["title" => $project->title, "category" => $project->category, "image" => $project->image])'>
                         Lihat Detail
                     </button>
                 </div>
@@ -247,6 +245,7 @@
         </div>
     </div>
 </section>
+
 
 <!-- CTA Section -->
 <section class="cta-section py-24 relative overflow-hidden">
@@ -359,7 +358,7 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     // Tech stack data
     const techStacks = {
         mobile: ['Flutter', 'Firebase', 'Swift', 'React Native'],
@@ -367,139 +366,55 @@ document.addEventListener('DOMContentLoaded', function() {
         design: ['Figma', 'Adobe XD', 'Photoshop', 'Illustrator'],
         seo: ['Analytics', 'SEMrush', 'Ahrefs', 'Search Console']
     };
-    
-    // ==================== HERO ANIMATIONS ====================
+
+    // Hero animations
     function animateHero() {
-        const titleWords = document.querySelectorAll('.hero-title-word');
-        const heroDesc = document.querySelector('.hero-description');
-        const heroButtons = document.querySelectorAll('.hero-buttons a');
-        // const heroImages = document.querySelectorAll('.hero-images img');
-        
-        // Simple animation function that mimics GSAP
-        function animateElement(el, delay = 0) {
-            setTimeout(() => {
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, delay);
-        }
-        
-        // Apply initial styles
-        titleWords.forEach(word => {
-            word.style.opacity = '0';
-            word.style.transform = 'translateY(50px)';
-            word.style.transition = 'all 0.6s ease';
+        const elements = [
+            ...document.querySelectorAll('.hero-title-word'),
+            document.querySelector('.hero-description')
+        ];
+
+        elements.forEach((el, i) => {
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                    el.style.transition = 'all 0.6s ease';
+                }, 300 + i * 100);
+            }
         });
-        
-        heroDesc.style.opacity = '0';
-        heroDesc.style.transform = 'translateY(30px)';
-        heroDesc.style.transition = 'all 0.6s ease';
-        
-        heroButtons.forEach(btn => {
-            btn.style.opacity = '0';
-            btn.style.transform = 'translateY(30px)';
-            btn.style.transition = 'all 0.6s ease';
-        });
-        
-        // heroImages.forEach(img => {
-        //     img.style.opacity = '0';
-        //     img.style.transform = 'translateY(60px)';
-        //     img.style.transition = 'all 0.8s ease';
-        // });
-        
-        // Animate elements with delays
-        titleWords.forEach((word, i) => animateElement(word, 300 + i * 100));
-        animateElement(heroDesc, 800);
-        heroButtons.forEach((btn, i) => animateElement(btn, 1200 + i * 200));
-        // heroImages.forEach((img, i) => animateElement(img, 500 + i * 300));
-        
-        // Add floating animation
-        // heroImages.forEach((img, i) => {
-        //     const direction = i % 2 === 0 ? -1 : 1;
-        //     const amount = 10 + (i * 5);
-            
-        //     setInterval(() => {
-        //         img.style.transform = `translateY(${direction * amount}px)`;
-        //         setTimeout(() => {
-        //             img.style.transform = 'translateY(0)';
-        //         }, 1500);
-        //     }, 3000);
-        // });
-        
-        // // Create particles
-        // createParticles();
     }
-    
-    // Create particle effect
-    function createParticles() {
-        const container = document.querySelector('.particles-container');
-        if (!container) return;
-        
-        const particleCount = 20; // Reduced from 30
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
-            
-            // Random size between 2px and 5px
-            const size = Math.random() * 3 + 2;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            
-            // Random position
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.top = `${Math.random() * 100}%`;
-            particle.style.opacity = Math.random() * 0.3 + 0.1;
-            
-            container.appendChild(particle);
-            
-            // Simple particle animation
-            setInterval(() => {
-                const x = (Math.random() - 0.5) * 50;
-                const y = (Math.random() - 0.5) * 50;
-                particle.style.transform = `translate(${x}px, ${y}px)`;
-                particle.style.transition = 'transform 15s ease-in-out';
-            }, 15000);
-        }
-    }
-    
+
     // Scroll animations
-    function handleScrollAnimations() {
-        const fadeElements = document.querySelectorAll('.fade-in');
-        
-        const observer = new IntersectionObserver(entries => {
+    function initScrollAnimations() {
+        const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
-                    observer.unobserve(entry.target);
                 }
             });
         }, { threshold: 0.1 });
-        
-        fadeElements.forEach(el => observer.observe(el));
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     }
-    
+
     // Project filtering
-    function initProjectFiltering() {
-        const filterBtns = document.querySelectorAll('.category-btn');
-        const projects = document.querySelectorAll('.project-card');
-        
-        filterBtns.forEach(btn => {
+    function initProjectFilter() {
+        document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                // Update active button
-                filterBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
                 const filter = this.dataset.filter;
                 
+                // Update active button
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
                 // Filter projects
-                projects.forEach(project => {
-                    const category = project.dataset.category;
-                    
-                    if (filter === 'semua' || category === filter) {
+                document.querySelectorAll('.project-card').forEach(project => {
+                    if (filter === 'semua' || project.dataset.category === filter) {
                         project.classList.remove('hidden');
-                        project.style.opacity = '1';
-                        project.style.transform = 'translateY(0)';
                     } else {
                         project.classList.add('hidden');
                     }
@@ -507,242 +422,82 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Modal handling
+
+    // Modal functionality
     function initModal() {
         const modal = document.getElementById('project-modal');
         const closeBtn = document.getElementById('close-modal');
-        const detailBtns = document.querySelectorAll('.detail-btn');
         
-        // Open modal
-        detailBtns.forEach(btn => {
+        // Open modal with project data
+        document.querySelectorAll('.detail-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const project = JSON.parse(this.dataset.project);
                 
                 // Update modal content
                 document.getElementById('modal-title').textContent = project.title;
-                document.getElementById('modal-image').src = project.image;
+                document.getElementById('modal-image').src = `/storage/${project.image}`;
                 
-                // Update category
+                // Set category
                 const categoryEl = document.getElementById('modal-category');
                 categoryEl.textContent = project.category.toUpperCase();
+                categoryEl.className = 'inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ' + 
+                    (project.category === 'mobile' ? 'bg-blue-100 text-blue-800' :
+                     project.category === 'web' ? 'bg-green-100 text-green-800' :
+                     project.category === 'design' ? 'bg-purple-100 text-purple-800' :
+                     'bg-yellow-100 text-yellow-800');
                 
-                // Set category color
-                const colorClasses = {
-                    mobile: 'bg-blue-100 text-blue-800',
-                    web: 'bg-green-100 text-green-800',
-                    design: 'bg-purple-100 text-purple-800',
-                    seo: 'bg-yellow-100 text-yellow-800'
-                };
-                categoryEl.className = `inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ${colorClasses[project.category]}`;
-                
-                // Update tech stack
+                // Set tech stack
                 const techEl = document.getElementById('modal-tech');
                 techEl.innerHTML = '';
-                techStacks[project.category].forEach(tech => {
-                    const badge = document.createElement('span');
-                    badge.className = 'px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm';
-                    badge.textContent = tech;
-                    techEl.appendChild(badge);
+                (techStacks[project.category] || []).forEach(tech => {
+                    techEl.innerHTML += `<span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">${tech}</span>`;
                 });
                 
-                // Show modal with animation
+                // Show modal
                 modal.style.display = 'block';
-                setTimeout(() => {
-                    modal.classList.add('open');
-                }, 10);
+                setTimeout(() => modal.classList.add('open'), 10);
             });
         });
         
         // Close modal
+        closeBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => e.target === modal && closeModal());
+        
         function closeModal() {
             modal.classList.remove('open');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
+            setTimeout(() => modal.style.display = 'none', 300);
         }
-        
-        closeBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
     }
-    
+
+    // CTA animations
+    function initCTA() {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                // Animate elements sequentially
+                ['cta-title', 'cta-description', ...document.querySelectorAll('.cta-feature')]
+                    .forEach((selector, i) => {
+                        const el = typeof selector === 'string' ? 
+                            document.querySelector(selector) : selector;
+                        if (el) {
+                            setTimeout(() => {
+                                el.style.opacity = '1';
+                                el.style.transform = 'translateY(0)';
+                                el.style.transition = 'all 0.6s ease';
+                            }, 300 + i * 200);
+                        }
+                    });
+            }
+        }, { threshold: 0.3 });
+
+        observer.observe(document.querySelector('.cta-section'));
+    }
+
     // Initialize all functions
     animateHero();
-    handleScrollAnimations();
-    initProjectFiltering();
+    initScrollAnimations();
+    initProjectFilter();
     initModal();
-});
-
-// Script to handle CTA section animations
-document.addEventListener('DOMContentLoaded', function() {
-    // Reveal animations when section comes into view
-    const ctaSection = document.querySelector('.cta-section');
-    const ctaTitle = document.querySelector('.cta-title');
-    const ctaDesc = document.querySelector('.cta-description');
-    const ctaFeatures = document.querySelectorAll('.cta-feature');
-    const ctaButton = document.querySelector('.cta-button-wrapper');
-    
-    // Create intersection observer
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) {
-            // Animate title
-            setTimeout(() => {
-                ctaTitle.style.transition = 'all 0.8s ease-out';
-                ctaTitle.style.opacity = '1';
-                ctaTitle.style.transform = 'translateY(0)';
-            }, 300);
-            
-            // Animate description
-            setTimeout(() => {
-                ctaDesc.style.transition = 'all 0.8s ease-out';
-                ctaDesc.style.opacity = '1';
-                ctaDesc.style.transform = 'translateY(0)';
-            }, 500);
-            
-            // Animate features
-            ctaFeatures.forEach((feature, index) => {
-                setTimeout(() => {
-                    feature.style.transition = 'all 0.6s ease-out';
-                    feature.style.opacity = '0';
-                    feature.style.transform = 'translateY(20px)';
-                    
-                    setTimeout(() => {
-                        feature.style.opacity = '1';
-                        feature.style.transform = 'translateY(0)';
-                    }, 100);
-                }, 700 + (index * 200));
-            });
-            
-            // Animate button
-            setTimeout(() => {
-                ctaButton.style.transition = 'all 0.8s ease-out';
-                ctaButton.style.opacity = '0';
-                ctaButton.style.transform = 'translateY(20px)';
-                
-                setTimeout(() => {
-                    ctaButton.style.opacity = '1';
-                    ctaButton.style.transform = 'translateY(0)';
-                }, 100);
-            }, 1200);
-            
-            // Create particles
-            createParticles();
-            
-            // Disconnect observer after animation
-            observer.disconnect();
-        }
-    }, { threshold: 0.3 });
-    
-    observer.observe(ctaSection);
-    
-    // Button pulse effect
-    const ctaButtonEl = document.getElementById('ctaButton');
-    ctaButtonEl.addEventListener('mouseover', function() {
-        this.style.transform = 'translateY(-4px)';
-    });
-    
-    ctaButtonEl.addEventListener('mouseout', function() {
-        this.style.transform = 'translateY(0)';
-    });
-    
-    // Create particles
-    function createParticles() {
-        const particlesContainer = document.querySelector('.cta-particles');
-        const particleCount = 20;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const size = Math.random() * 4 + 1;
-            const particle = document.createElement('div');
-            
-            particle.classList.add('cta-particle');
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.top = `${Math.random() * 100}%`;
-            particle.style.opacity = Math.random() * 0.5 + 0.1;
-            
-            particlesContainer.appendChild(particle);
-            
-            // Random floating animation
-            anime({
-                targets: particle,
-                translateX: [
-                    { value: (Math.random() - 0.5) * 50, duration: 5000 },
-                    { value: (Math.random() - 0.5) * 50, duration: 5000 }
-                ],
-                translateY: [
-                    { value: (Math.random() - 0.5) * 50, duration: 5000 },
-                    { value: (Math.random() - 0.5) * 50, duration: 5000 }
-                ],
-                opacity: [
-                    { value: Math.random() * 0.5 + 0.5, duration: 2000 },
-                    { value: Math.random() * 0.3 + 0.1, duration: 2000 }
-                ],
-                easing: 'easeInOutQuad',
-                direction: 'alternate',
-                loop: true
-            });
-        }
-    }
-    
-    // Modified anime.js micro implementation - just enough for our particles
-    function anime(params) {
-        const targets = params.targets;
-        const duration = params.translateX[0].duration;
-        const startX = parseFloat(targets.style.transform.replace(/[^\d.-]/g, '') || 0);
-        const startY = parseFloat(targets.style.transform.replace(/[^\d.-]/g, '') || 0);
-        const targetX = params.translateX[0].value;
-        const targetY = params.translateY[0].value;
-        const startOpacity = parseFloat(targets.style.opacity || 0);
-        const targetOpacity = params.opacity[0].value;
-        
-        let startTime;
-        
-        function animate(time) {
-            if (!startTime) startTime = time;
-            const elapsed = time - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            // Easing function (easeInOutQuad)
-            const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-            
-            // Apply transforms
-            const currentX = startX + (targetX - startX) * eased;
-            const currentY = startY + (targetY - startY) * eased;
-            const currentOpacity = startOpacity + (targetOpacity - startOpacity) * eased;
-            
-            targets.style.transform = `translate(${currentX}px, ${currentY}px)`;
-            targets.style.opacity = currentOpacity;
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else if (params.direction === 'alternate' && params.loop) {
-                // Reverse values and continue animation
-                params.translateX = [
-                    { value: startX, duration: duration },
-                    { value: targetX, duration: duration }
-                ];
-                params.translateY = [
-                    { value: startY, duration: duration },
-                    { value: targetY, duration: duration }
-                ];
-                params.opacity = [
-                    { value: startOpacity, duration: duration / 2 },
-                    { value: targetOpacity, duration: duration / 2 }
-                ];
-                anime(params);
-            }
-        }
-        
-        requestAnimationFrame(animate);
-        
-        return {
-            pause: function() {},
-            play: function() {}
-        };
-    }
+    initCTA();
 });
 </script>
 @endpush

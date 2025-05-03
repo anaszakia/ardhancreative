@@ -150,17 +150,34 @@
     .logo-container {
         display: flex;
         overflow: hidden;
+        width: 100%;
     }
+
     .logo-slider {
         display: flex;
-        animation: slide 20s linear infinite;
+        animation: marquee 20s linear infinite;
+        width: 200%; /* Make room for duplicate logos */
     }
+
     .logo-slider:hover {
         animation-play-state: paused;
     }
-    @keyframes slide {
+
+    @keyframes marquee {
         0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
+        100% { transform: translateX(-50%); } /* Move exactly half of the width */
+    }
+
+    /* Ensure items don't get squished on mobile */
+    .logo-slider > div {
+        min-width: 150px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+        .logo-slider > div {
+            min-width: 120px;
+        }
     }
     
     /* Counter Animation */
@@ -426,34 +443,34 @@
         </div>
     </section>
 
-    <!-- Client Logo Slider -->
+   <!-- Client Logo Slider -->
+   @php
+    $clients = App\Models\Klien::all();
+    @endphp
+
     <section class="py-10 bg-gray-50">
         <div class="container mx-auto px-4">
             <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">Dipercaya oleh</h2>
             
             <div class="logo-container">
                 <div class="logo-slider">
+                    @foreach($clients as $client)
                     <div class="px-4 flex items-center justify-center">
-                        <img src="{{ asset('images/clients/pol.png') }}" alt="Client Logo 1" class="h-16 grayscale hover:grayscale-0 transition-all">
+                        <img src="{{ asset('storage/' . $client->logo) }}" alt="{{ $client->klien }}"
+                            class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all">
                     </div>
-                    <div class="px-4 flex items-center justify-center">
-                        <img src="{{ asset('images/clients/rad.png') }}" alt="Client Logo 2" class="h-16 grayscale hover:grayscale-0 transition-all">
-                    </div>
-                    <div class="px-4 flex items-center justify-center">
-                        <img src="{{ asset('images/hero/logoasli.png') }}" alt="Client Logo 3" class="h-16 grayscale hover:grayscale-0 transition-all">
-                    </div>
-                    <div class="px-4 flex items-center justify-center">
-                        <img src="{{ asset('images/clients/kpu.png') }}" alt="Client Logo 4" class="h-16 grayscale hover:grayscale-0 transition-all">
-                    </div>
-                    <div class="px-4 flex items-center justify-center">
-                        <img src="{{ asset('images/clients/smg.png') }}" alt="Client Logo 5" class="h-16 grayscale hover:grayscale-0 transition-all">
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Layanan Utama -->
+    @php
+        use App\Models\Layanan;
+        $layanans = Layanan::all();
+    @endphp
+
     <section class="py-20 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16 reveal-element">
@@ -462,12 +479,12 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 reveal-element">
-                @foreach(['MOBILE APP DEVELOPMENT', 'WEB DEVELOPMENT', 'SEO', 'SOSIAL MEDIA ADS', 'UI/UX DESIGN & BRAND DESIGN'] as $service)
+                @foreach($layanans as $layanan)
                 <div class="service-card bg-gradient-to-b from-transparent to-black relative rounded-lg overflow-hidden group h-96">
-                    <img src="{{ asset('images/layanan/mob.jpg') }}" alt="{{ $service }}" class="w-full h-full object-cover absolute inset-0">
+                    <img src="{{ asset('storage/' . $layanan->gambar) }}" alt="{{ $layanan->layanan }}" class="w-full h-full object-cover absolute inset-0">
                     <div class="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-50 transition-all"></div>
                     <div class="relative z-10 flex flex-col justify-end h-full p-6">
-                        <h3 class="text-2xl font-bold text-white mb-2">{{ $service }}</h3>
+                        <h3 class="text-2xl font-bold text-white mb-2">{{ $layanan->layanan }}</h3>
                     </div>
                 </div>
                 @endforeach
@@ -969,16 +986,16 @@
         });
         
         // Client logo slider
-        const logoSlider = document.querySelector('.logo-slider');
-        if (logoSlider) {
-            const logos = document.querySelectorAll('.logo-slider > div');
+        // const logoSlider = document.querySelector('.logo-slider');
+        // if (logoSlider) {
+        //     const logos = document.querySelectorAll('.logo-slider > div');
             
-            // Clone all logos and append them to create the illusion of infinite scrolling
-            logos.forEach(logo => {
-                const clone = logo.cloneNode(true);
-                logoSlider.appendChild(clone);
-            });
-        }
+        //     // Clone all logos and append them to create the illusion of infinite scrolling
+        //     logos.forEach(logo => {
+        //         const clone = logo.cloneNode(true);
+        //         logoSlider.appendChild(clone);
+        //     });
+        // }
     });
      document.addEventListener('DOMContentLoaded', function() {
         // Add these to your existing DOMContentLoaded function
@@ -1220,5 +1237,29 @@
             }, 3000);
         }, duration * 1000 - 3000);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Client logo slider
+    const logoSlider = document.querySelector('.logo-slider');
+    if (logoSlider) {
+        const logos = logoSlider.querySelectorAll('div');
+        
+        // Clone all logos and append them to create the illusion of infinite scrolling
+        logos.forEach(logo => {
+            const clone = logo.cloneNode(true);
+            logoSlider.appendChild(clone);
+        });
+    }
+    
+    // Hero section animations
+    setTimeout(() => {
+        if (typeof animateHeroSection === 'function') {
+            animateHeroSection();
+        }
+        if (typeof createParticles === 'function') {
+            createParticles();
+        }
+    }, 100);
+});
 </script>
 @endpush
